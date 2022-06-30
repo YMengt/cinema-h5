@@ -1,0 +1,160 @@
+<template>
+    <div>
+        <Header title="喵喵影院"></Header>
+        <div id="content">
+			<!-- <div class="cinema_menu">
+				<div class="city_switch">
+					全城 <i class="iconfont icon-jiantouxia"></i>
+				</div>
+				<div class="brand_swtich">
+					品牌 <i class="iconfont icon-jiantouxia"></i>
+				</div>
+				<div class="feature_switch">
+					特色 <i class="iconfont icon-jiantouxia"></i>
+				</div>
+			</div> -->
+            <dropdown-menu>
+            <dropdown-item v-model="value1" :options="option1" />
+            <dropdown-item v-model="value2" :options="option2" />
+
+            <dropdown-item title="筛选" ref="item">               
+                     <grid  :column-num="4" :clickable="true">
+                        <grid-item class="g-item" text="文字"  />
+                        <grid-item class="g-item"  text="文字" />
+                        <grid-item class="g-item" text="文字" />
+                        <grid-item class="g-item" text="文字" />
+                        <grid-item class="g-item" text="文字" />
+                    </grid>
+            </dropdown-item>    
+
+
+            </dropdown-menu>
+
+           
+
+
+			<div class="cinema_body">
+				<ul>
+					<li v-for="(item,index) in cinemaList" :key="index">
+                        
+                        
+                       <!-- {{item}} -->
+                            <div>
+                                <span>{{item.name}}</span>
+                                <span class="q"><span class="price">{{item.lowPrice/100}}</span> 元起</span>
+                            </div>
+                            <div class="address">
+                                <span>{{item.address}}</span>
+                                <span>{{Number(item.Distance).toFixed(2) }}km</span>
+                            </div>
+						
+					</li>
+				</ul>
+			</div>
+		</div>
+
+        <TabBar></TabBar>
+    </div>
+</template>
+
+<script>
+import Header from "@/components/Header"
+import TabBar from "@/components/TabBar"
+import api from "../../utils/api"
+import { reactive, toRefs } from '@vue/reactivity'
+import { DropdownMenu, DropdownItem,Cell,Grid, GridItem } from 'vant';
+    export default {
+         name:'Cinema',
+        components:{Header,TabBar, DropdownMenu, DropdownItem,Cell,Grid, GridItem},
+    setup () {
+        let info=reactive({
+            cinemaList:[],
+            option1 :[
+                { text: 'app订票', value: 0 },
+                { text: '前台兑换', value: 1 },
+                ],
+            option2 :[
+                { text: '最近去过', value: 0 },
+                { text: '离我最近', value: 1},
+               
+            ],
+            value1:0,
+            value2:0
+
+
+        })
+         let districtNameMap=new Map()
+        const getCinema=async()=>{
+            let result=await api.cinemaInfo.getCinema()
+            info.cinemaList=result.cinemas
+            console.log(info.cinemaList)
+           
+            info.cinemaList.map((item)=>{
+                districtNameMap.set(item.districtName,item.districtId)
+            })
+            console.log(districtNameMap)
+        }
+        getCinema()
+
+        return {
+            ...toRefs(info)
+        }
+    }
+}
+</script>
+
+<style lang="scss" scoped>
+#content .cinema_menu{ 
+    width: 100%;
+    height: 45px;
+     border-bottom:1px solid #e6e6e6;
+      display: flex;
+       justify-content:space-around; 
+       align-items:center;
+        background:white;
+    }
+#content .cinema_body{ 
+    flex:1; 
+    overflow:auto;
+    ul{
+         padding:20px;
+        li{ 
+             border-bottom:1px solid #e6e6e6; 
+             margin-bottom: 20px;
+             .q{ 
+                 font-size: 11px; 
+                 color:#f03d37;
+                 .price{
+                      font-size: 18px;
+                      }
+                 
+                 }
+             }
+
+             .address{ 
+                 font-size: 13px; color:#666;
+                 }
+                 .address span:nth-of-type(1){
+                     display: inline-block;
+                      width: 262px;                     
+                      line-height: 30px;
+                      }
+                 .address span:nth-of-type(2){ float:right; }
+         
+         }
+    .g-item{
+        box-sizing: border-box;
+        font-size: 12px;
+        display: inline-block;
+        width: calc(25vw - 12.5px);
+        height: 30px;
+        padding-bottom: 15px;
+        padding-right: 10px;
+
+    }
+ }
+
+.cinema_body div{ margin-bottom: 10px;}
+
+
+</style>
